@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  database:
+    image: mariadb:11.0.2
+    restart: always
+    networks:
+      - app
+    volumes:
+      - ./var/database:/var/lib/mysql:rw
+    ports:
+      - "3306:3306"
+    env_file:
+      - ./.env
+
+  web:
+    build:
+      context: ./opt/apache
+      dockerfile: Dockerfile
+    networks:
+      - app
+    depends_on:
+      - database
+    ports:
+      - "8080:80"
+    env_file:
+      - ./.env
+    volumes:
+      - ./:/var/www/html:cached
+
+networks:
+  app:
