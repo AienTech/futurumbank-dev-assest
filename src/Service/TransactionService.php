@@ -9,6 +9,8 @@ use App\Repository\TransactionRepository;
 use App\Type\BlockAddress;
 use App\Type\Payload;
 use App\Type\Result;
+use DateTime;
+use InvalidArgumentException;
 
 class TransactionService {
 
@@ -24,6 +26,22 @@ class TransactionService {
 	 * It will retrieve and save transactions if not.
 	 */
 	public function getAddressTransactions(Payload $payload): Result {
+
+		$today = new DateTime();
+		$start = new DateTime($payload->getTimeframeFrom());
+		$end = new DateTime($payload->getTimeframeTo());
+
+		if ($start >= $today || $end >= $today) {
+			// One or both dates are not before today
+			throw new InvalidArgumentException("Timeframe must be in the past.");
+		}
+		
+		if ($start >= $end) {
+			// Start date is not before end date
+			throw new InvalidArgumentException("Start date must be before end date.");
+		}
+		
+		// If the code reaches here, timeframe is validated
 
 		$address = $this->addressRepository->findOneBy(
 			[
