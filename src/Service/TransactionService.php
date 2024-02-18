@@ -18,10 +18,17 @@ class TransactionService {
 		private readonly AddressRepository $addressRepository,
 	) {}
 
+	/**
+	 * Retrieves transactions for a given address and payload.
+	 * It checks if an address with the provided payload already exists.
+	 * It will retrieve and save transactions if not.
+	 */
 	public function getAddressTransactions(Payload $payload): Result {
 
-		$address = $this->addressRepository->find(
-			$payload->getAddress(),
+		$address = $this->addressRepository->findOneBy(
+			[
+				"address" => $payload->getAddress()
+			],
 		);
 
 		/**
@@ -30,8 +37,17 @@ class TransactionService {
 		$result = null;
 
 		if (is_null($address)) {
+			/**
+			 * It is basically the first time we called for the address
+			 */
 			$this->fetchAddressTxs($payload);
 		} else {
+			/**
+			 * Solutions:
+			 * [ ] 1. Webhook
+			 * [ ] 2. Cronjob optimistic update
+			 * [x] 3. Naive date diff check
+			 */
 			$today = new \DateTime();
 			$interval = $address->getLastVerifiedAt()->diff($today);
 
@@ -51,7 +67,19 @@ class TransactionService {
 		return $result;
 	}
 
+	/**
+	 *  Fetches and saves transactions for a given address from an external service.
+	 */
 	private function fetchAddressTxs(Payload $payload): void {
+		/**
+		 * Service constraint:
+		 * the service can support 3 req/sec and up to 100 req/hour
+		 * solutions would be:
+		 * 1. upgrade the subscription to support for more
+		 * 2. request for an update every 36 secconds. This
+		 * 		would be more suitable for a cronjob approach
+		 */
+
 		$maxPage = 1;
 		$page = 1;
 		$block = null;

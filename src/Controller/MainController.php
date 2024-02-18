@@ -34,8 +34,6 @@ class MainController extends AbstractController
         }
 
         try {
-            if ($payload->getAsset())
-
             $result = $bitcoinService->getAddressTransactions($payload)->to();
             
             return $this->json($result);

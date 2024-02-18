@@ -26,6 +26,8 @@ class Payload {
         $this->timeframeFrom = $timeframeFrom;
         $this->timeframeTo = $timeframeTo;
         $this->threshold = $threshold;
+
+        self::validate();
     }
 
     /**

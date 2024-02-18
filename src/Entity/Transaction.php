@@ -31,8 +31,13 @@ class Transaction
 
     #[ORM\ManyToOne(
         targetEntity: Address::class,
+        inversedBy: "transactions"
     )]
-    #[ORM\JoinColumn(name: 'address_id', referencedColumnName: 'id', nullable: false)]
+    #[ORM\JoinColumn(
+        name: 'address_id',
+        referencedColumnName: 'id',
+        nullable: false
+    )]
     private ?Address $address = null;
 
     public function getId(): ?int

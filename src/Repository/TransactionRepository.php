@@ -46,23 +46,6 @@ class TransactionRepository extends ServiceEntityRepository
         $em->clear();
     }
 
-    public function timeframeExists(string $address, DateTime $start, DateTime $end) {
-        $qb = $this->createQueryBuilder("tx");
-
-        [$result] = $qb->select(
-            "MIN(tx.confirmed) AS min_date",
-            "MAX(tx.confirmed) AS max_date",
-        )->where(
-            $qb->expr()->gte("tx.address", ":address")
-        )->setParameter("address", $address)
-        ->getQuery()
-        ->getResult();
-
-        $dataComplete = $start >= $result['min_date'] && $end <= $result['max_date'];
-
-        return $dataComplete;
-    }
-
     public function getTransactionsWithPayload(Payload $payload) {
         $qb = $this->createQueryBuilder('tx');
 
