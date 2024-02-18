@@ -5,7 +5,9 @@
 {% block body %}
 <div class="w-full h-full p-16">
     <div class="flex flex-col justify-center items-center">
-        <form>
+        <form
+            x-data="useForm" x-on:submit.prevent="post"
+        >
             <div class="space-y-12">
                 <h2 class="text-base font-semibold leading-7 text-gray-900">Chain Explorer Light</h2>
                 <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
@@ -15,10 +17,9 @@
                             <select
                                 id="asset"
                                 name="asset"
-                                autocomplete="asset-name"
-                                class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
+                                class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600"
                             >
-                                <option value="btc">BTC</option>
+                                <option selected value="btc">BTC</option>
                                 <option value="eth">ETH</option>
                             </select>
                         </div>
@@ -84,8 +85,44 @@
                     Search
                 </button>
             </div>
+            <div x-show="response" x-transition class="flex flex-col gap-2">
+                <div class="flex justify-start gap-2"><p class="font-bold">Count Tx:</p><p x-text="response.count"></p></div>
+                <div class="flex justify-start gap-2"><p class="font-bold">Avg Tx Quantity:</p><p  x-text="response.averageQuantity"></p></div>
+            </div>
         </form>
     </div>
 </div>
+{% endblock %}
 
+{% block javascripts %}
+<script>
+    document.addEventListener("alpine:init", () => {
+        Alpine.data("useForm", () => ({
+            response: false,
+
+            data() {
+                const inputs = Array.from(this.$el.querySelectorAll("input, select"));
+                const data = inputs.reduce(
+                    (object, key) => ({
+                        ...object,
+                        [key.name]: key.value !== "" ? key.value : null
+                    }), {}
+                );
+                return data;
+            },
+
+            async post() {
+                this.response = await (
+                    await fetch("/post", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(this.data()),
+                    })
+                ).json();
+            },
+        }));
+    });
+</script>
 {% endblock %}

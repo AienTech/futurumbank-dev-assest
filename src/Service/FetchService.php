@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use GuzzleHttp\Client;
+use Psr\Http\Message\StreamInterface;
 
 class FetchService {
 
@@ -15,10 +16,28 @@ class FetchService {
 		]);
 	}
 
-	public function fetchBitcoinAddress(string $address) {
+	public function fetchAddress(
+		string $asset = 'btc',
+		string $address,
+		int $limit,
+		int|null $after = null,
+	): StreamInterface {
 		$response = $this->client->request(
 			'GET',
-			sprintf('btc/main/blocks/%s', $address)
+			is_null($after)
+				? sprintf(
+					'%s/main/addrs/%s?limit=%d',
+					$asset,
+					$address,
+					$limit,
+				)
+				: sprintf(
+					'%s/main/addrs/%s?limit=%d&after=%s',
+					$asset,
+					$address,
+					$limit,
+					$after
+				)
 		);
 
 		return $response->getBody();
