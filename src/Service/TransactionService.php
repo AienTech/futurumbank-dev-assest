@@ -115,13 +115,13 @@ class TransactionService {
 			if ($block === null) {
 				$block = BlockAddress::from(json_decode($res));
 				$maxPage = ceil($block->getNTx() / $limit);
-				$after = $block->getTxrefs()[count($block->getTxrefs()) -1]->getBlockHeight();
 			} else {
 				$block->addTxrefs(
 					BlockAddress::from(json_decode($res))->getTxrefs()
 				);
 			}
 
+			$after = $block->getTxrefs()[count($block->getTxrefs()) -1]->getBlockHeight();
 			$page += 1;
 		} while ($page <= $maxPage);
 
